@@ -1,0 +1,23 @@
+# GoLand
+.idea/
+*.iml
+
+# Build output
+/bin/
+/dist/
+/server
+/client
+*.exe
+*.exe~
+*.test
+
+# Coverage and profiling
+/coverage/
+coverage.out
+coverage.html
+*.prof
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
