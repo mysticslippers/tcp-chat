@@ -6,7 +6,7 @@ import (
 	"net"
 )
 
-func handle(connection net.Conn) error {
+func Handle(connection net.Conn) error {
 	defer func(connection net.Conn) {
 		err := connection.Close()
 		if err != nil {
@@ -17,7 +17,6 @@ func handle(connection net.Conn) error {
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 	_, err := fmt.Fprintln(connection, "Hello!")
 	if err != nil {
-		log.Printf("Error printing fprintln: %s", err)
 		return err
 	}
 
