@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Chat/internal/server"
 	"log"
 	"net"
 )
@@ -15,7 +16,7 @@ func main() {
 	defer func(listener net.Listener) {
 		err := listener.Close()
 		if err != nil {
-			log.Fatalf("Unable to close listener: %s", err)
+			log.Printf("Unable to close listener: %s", err)
 		}
 	}(listener)
 
@@ -26,11 +27,10 @@ func main() {
 			log.Printf("Unable to accept connection: %s", err)
 			return
 		}
-		log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
-		closeErr := connection.Close()
-		if closeErr != nil {
-			log.Printf("Unable to close connection: %s", closeErr)
+		err = server.Handle(connection)
+		if err != nil {
+			log.Printf("Unable to handle connection: %s", err)
 		}
 	}
 }
