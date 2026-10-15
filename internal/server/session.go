@@ -32,7 +32,7 @@ func Handle(connection net.Conn) error {
 			return err
 		}
 
-		_, err = fmt.Fprintln(connection, message)
+		_, err = fmt.Fprint(connection, message)
 		if err != nil {
 			return err
 		}
