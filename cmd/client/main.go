@@ -10,6 +10,6 @@ func main() {
 
 	err := client.Client(address)
 	if err != nil {
-		log.Fatalf("Unable to connect to server: %s", err)
+		log.Fatalf("Client error: %s", err)
 	}
 }
