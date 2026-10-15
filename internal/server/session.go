@@ -3,6 +3,7 @@ package server
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 )
@@ -16,21 +17,24 @@ func Handle(connection net.Conn) error {
 	}(connection)
 
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
-	_, err := fmt.Fprintln(connection, "Hello!")
+	_, err := fmt.Fprintln(connection, "You have successfully connected to the server")
 	if err != nil {
 		return err
 	}
 
 	reader := bufio.NewReader(connection)
-	message, err := reader.ReadString('\n')
-	if err != nil {
-		return err
-	}
+	for {
+		message, err := reader.ReadString('\n')
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
 
-	_, err = fmt.Fprint(connection, message)
-	if err != nil {
-		return err
+		_, err = fmt.Fprintln(connection, message)
+		if err != nil {
+			return err
+		}
 	}
-
-	return nil
 }
