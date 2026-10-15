@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 )
 
 func Client(address string) error {
@@ -26,6 +27,25 @@ func Client(address string) error {
 		return err
 	}
 	fmt.Print(message)
+
+	fmt.Print("Please, input your message: ")
+	inputReader := bufio.NewReader(os.Stdin)
+	input, err := inputReader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
+	_, err = fmt.Fprint(connection, input)
+	if err != nil {
+		return err
+	}
+
+	reply, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+
+	fmt.Print("Reply from server: ", reply)
 
 	return nil
 }
