@@ -3,6 +3,7 @@ package client
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -28,24 +29,26 @@ func Client(address string) error {
 	}
 	fmt.Print(message)
 
-	fmt.Print("Please, input your message: ")
 	inputReader := bufio.NewReader(os.Stdin)
-	input, err := inputReader.ReadString('\n')
-	if err != nil {
-		return err
+	for {
+		fmt.Print("Please, input your message: ")
+		input, err := inputReader.ReadString('\n')
+		if err == io.EOF {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+
+		_, err = fmt.Fprint(connection, input)
+		if err != nil {
+			return err
+		}
+
+		reply, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		fmt.Print("Reply from server: ", reply)
 	}
-
-	_, err = fmt.Fprint(connection, input)
-	if err != nil {
-		return err
-	}
-
-	reply, err := reader.ReadString('\n')
-	if err != nil {
-		return err
-	}
-
-	fmt.Print("Reply from server: ", reply)
-
-	return nil
 }
