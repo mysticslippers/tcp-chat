@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func shutdown() {
+func shutdown(requested chan struct{}) {
 	command := make(chan struct{})
 	interrupt := make(chan os.Signal, 1)
 
@@ -32,4 +32,6 @@ func shutdown() {
 	case <-command:
 	case <-interrupt:
 	}
+
+	close(requested)
 }
