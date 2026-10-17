@@ -7,6 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
+	"strings"
 )
 
 func Client(address string) error {
@@ -33,6 +34,9 @@ func Client(address string) error {
 	for {
 		fmt.Print("Please, input your message: ")
 		input, err := inputReader.ReadString('\n')
+		if strings.TrimSpace(input) == "quit" {
+			return nil
+		}
 		if err == io.EOF {
 			return nil
 		}
