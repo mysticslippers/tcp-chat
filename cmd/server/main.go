@@ -44,10 +44,7 @@ func main() {
 		}
 	}(listener, stop, done)
 
-	go func(requested chan struct{}) {
-		shutdown()
-		close(requested)
-	}(shutDownRequested)
+	go shutdown(shutDownRequested)
 
 	log.Println("Server launched on", address)
 
