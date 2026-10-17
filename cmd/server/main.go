@@ -2,6 +2,7 @@ package main
 
 import (
 	"Chat/internal/server"
+	"errors"
 	"log"
 	"net"
 )
@@ -20,17 +21,48 @@ func main() {
 		}
 	}(listener)
 
-	log.Println("Server started on", address)
-	for {
-		connection, err := listener.Accept()
-		if err != nil {
-			log.Printf("Unable to accept connection: %s", err)
-			return
-		}
+	stop := make(chan struct{})
+	done := make(chan struct{})
+	shutDownRequested := make(chan struct{})
 
-		err = server.Handle(connection)
-		if err != nil {
-			log.Printf("Unable to handle connection: %s", err)
+	go func(listener net.Listener, stop <-chan struct{}, done chan struct{}) {
+		defer close(done)
+
+		for {
+			connection, err := listener.Accept()
+			if err != nil {
+				if !errors.Is(err, net.ErrClosed) {
+					log.Printf("Unable to accept connection: %s", err)
+				}
+				return
+			}
+
+			err = server.Handle(connection, stop)
+			if err != nil && !errors.Is(err, net.ErrClosed) {
+				log.Printf("Unable to handle connection: %s", err)
+			}
 		}
+	}(listener, stop, done)
+
+	go func(requested chan struct{}) {
+		shutdown()
+		close(requested)
+	}(shutDownRequested)
+
+	log.Println("Server launched on", address)
+
+	select {
+	case <-shutDownRequested:
+	case <-done:
 	}
+
+	log.Println("Stopping server...")
+	close(stop)
+
+	if err := listener.Close(); err != nil && !errors.Is(err, net.ErrClosed) {
+		log.Printf("Unable to close listener: %s", err)
+	}
+
+	<-done
+	log.Println("Server is shutdown")
 }
