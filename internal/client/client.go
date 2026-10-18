@@ -48,6 +48,7 @@ func Client(address string) error {
 			}
 
 			fmt.Print("Reply from server: ", reply)
+			fmt.Print("> ")
 		}
 	}(reader, serverDone)
 
