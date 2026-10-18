@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net"
+	"sync"
 )
 
 func main() {
@@ -21,6 +22,7 @@ func main() {
 		}
 	}(listener)
 
+	var handlers sync.WaitGroup
 	stop := make(chan struct{})
 	done := make(chan struct{})
 	shutDownRequested := make(chan struct{})
@@ -37,10 +39,16 @@ func main() {
 				return
 			}
 
-			err = server.Handle(connection, stop)
-			if err != nil && !errors.Is(err, net.ErrClosed) {
-				log.Printf("Unable to handle connection: %s", err)
-			}
+			handlers.Add(1)
+
+			go func(connection net.Conn, stop <-chan struct{}) {
+				defer handlers.Done()
+
+				err := server.Handle(connection, stop)
+				if err != nil && !errors.Is(err, net.ErrClosed) {
+					log.Printf("Unable to handle connection: %s", err)
+				}
+			}(connection, stop)
 		}
 	}(listener, stop, done)
 
@@ -61,5 +69,6 @@ func main() {
 	}
 
 	<-done
+	handlers.Wait()
 	log.Println("Server is shutdown")
 }
