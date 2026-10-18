@@ -15,12 +15,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to start server: %s", err)
 	}
-	defer func(listener net.Listener) {
-		err := listener.Close()
-		if err != nil {
-			log.Printf("Unable to close listener: %s", err)
-		}
-	}(listener)
 
 	var handlers sync.WaitGroup
 	stop := make(chan struct{})
