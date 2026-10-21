@@ -1,13 +1,19 @@
 package server
 
 import (
+	"Chat/internal/server/commands"
 	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net"
+	"strings"
 )
+
+type Session struct {
+	MessageCount int
+}
 
 func Handle(connection net.Conn, stop <-chan struct{}) error {
 	defer func(connection net.Conn) {
@@ -38,6 +44,7 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 		return err
 	}
 
+	session := &Session{}
 	reader := bufio.NewReader(connection)
 	for {
 		message, err := reader.ReadString('\n')
@@ -46,6 +53,18 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 		}
 		if err != nil {
 			return err
+		}
+
+		switch strings.TrimSpace(message) {
+		case "stats":
+			var command commands.Command = commands.StatsCommand{
+				MessageCount: session.MessageCount,
+			}
+
+			message = command.Execute()
+
+		default:
+			session.MessageCount++
 		}
 
 		_, err = fmt.Fprint(connection, message)
