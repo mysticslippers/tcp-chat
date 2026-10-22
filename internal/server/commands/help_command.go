@@ -1,8 +1,10 @@
 package commands
 
 import (
+	"fmt"
 	"sort"
 	"strings"
+	"unicode/utf8"
 )
 
 type HelpCommand struct {
@@ -22,5 +24,21 @@ func (command HelpCommand) Execute() string {
 
 	sort.Strings(items)
 
-	return strings.Join(items, " | ") + "\n"
+	width := 0
+	for _, item := range items {
+		length := utf8.RuneCountInString(item)
+		if length > width {
+			width = length
+		}
+	}
+
+	border := "\t+" + strings.Repeat("-", width+2) + "+\n"
+
+	var result strings.Builder
+	result.WriteString(border)
+	for _, item := range items {
+		result.WriteString(fmt.Sprintf("\t| %-*s |\n", width, item))
+	}
+
+	return result.String() + border
 }
