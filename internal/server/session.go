@@ -56,10 +56,15 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 		}
 
 		switch strings.TrimSpace(message) {
-		case "stats":
+		case "/stats":
 			var command commands.Command = commands.StatsCommand{
 				MessageCount: session.MessageCount,
 			}
+
+			message = command.Execute()
+
+		case "/help":
+			var command commands.Command = commands.HelpCommand{}
 
 			message = command.Execute()
 
