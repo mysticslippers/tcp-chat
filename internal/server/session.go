@@ -3,8 +3,8 @@ package server
 import (
 	"Chat/internal/server/commands"
 	"bufio"
+	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -39,7 +39,9 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 	}(connection)
 
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
-	_, err := fmt.Fprintln(connection, "You have successfully connected to the server")
+	encoder := json.NewEncoder(connection)
+
+	err := encoder.Encode("You have successfully connected to the server\n")
 	if err != nil {
 		return err
 	}
@@ -72,7 +74,7 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 			session.MessageCount++
 		}
 
-		_, err = fmt.Fprint(connection, message)
+		err = encoder.Encode(message)
 		if err != nil {
 			return err
 		}
