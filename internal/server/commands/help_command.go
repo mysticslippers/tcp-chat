@@ -12,8 +12,9 @@ type HelpCommand struct {
 
 func (command HelpCommand) Execute() string {
 	descriptions := map[string]string{
-		"/help":  "show available commands",
-		"/stats": "show your message count",
+		"/help":        "show available commands",
+		"/stats":       "show your message count",
+		"/nick <name>": "change your nickname",
 	}
 
 	var items []string
