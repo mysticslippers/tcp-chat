@@ -13,6 +13,7 @@ import (
 
 type Session struct {
 	MessageCount int
+	Nickname     string
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}) error {
@@ -46,7 +47,9 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 		return err
 	}
 
-	session := &Session{}
+	session := &Session{
+		Nickname: "guest",
+	}
 	reader := bufio.NewReader(connection)
 	for {
 		message, err := reader.ReadString('\n')
