@@ -53,14 +53,16 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 	encoder := json.NewEncoder(connection)
 
-	err := encoder.Encode("You have successfully connected to the server\n")
+	session := &Session{
+		Nickname: "guest",
+		encoder:  json.NewEncoder(connection),
+	}
+
+	err := session.Send("You have successfully connected to the server\n")
 	if err != nil {
 		return err
 	}
 
-	session := &Session{
-		Nickname: "guest",
-	}
 	reader := bufio.NewReader(connection)
 	for {
 		message, err := reader.ReadString('\n')
