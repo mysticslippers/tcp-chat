@@ -60,7 +60,14 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 			return err
 		}
 
-		switch strings.TrimSpace(message) {
+		parts := strings.Fields(message)
+
+		commandName := ""
+		if len(parts) > 0 {
+			commandName = parts[0]
+		}
+
+		switch commandName {
 		case "/stats":
 			var command commands.Command = commands.StatsCommand{
 				MessageCount: session.MessageCount,
@@ -73,8 +80,20 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 
 			message = command.Execute()
 
+		case "/nick":
+			if len(parts) == 2 {
+				var command commands.Command = commands.NicknameCommand{
+					Name:   parts[1],
+					Target: &session.Nickname,
+				}
+
+				message = command.Execute()
+			} else {
+				message = "Usage: /nick <name>\n"
+			}
 		default:
 			session.MessageCount++
+			message = session.Nickname + ": " + message
 		}
 
 		err = encoder.Encode(message)
