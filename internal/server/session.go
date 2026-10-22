@@ -51,7 +51,6 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 	}(connection)
 
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
-	encoder := json.NewEncoder(connection)
 
 	session := &Session{
 		Nickname: "guest",
