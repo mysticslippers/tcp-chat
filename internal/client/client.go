@@ -26,7 +26,6 @@ func Client(address string) error {
 
 	decoder := json.NewDecoder(connection)
 	var message string
-
 	err = decoder.Decode(&message)
 	if err != nil {
 		return err
