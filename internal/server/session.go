@@ -9,11 +9,22 @@ import (
 	"log"
 	"net"
 	"strings"
+	"sync"
 )
 
 type Session struct {
 	MessageCount int
 	Nickname     string
+
+	encoder *json.Encoder
+	mutex   sync.Mutex
+}
+
+func (session *Session) Send(message string) error {
+	session.mutex.Lock()
+	defer session.mutex.Unlock()
+
+	return session.encoder.Encode(message)
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}) error {
