@@ -109,7 +109,7 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 			message = session.Nickname + ": " + message
 		}
 
-		err = encoder.Encode(message)
+		err = session.Send(message)
 		if err != nil {
 			return err
 		}
