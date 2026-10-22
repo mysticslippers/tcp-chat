@@ -2,6 +2,7 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -23,14 +24,16 @@ func Client(address string) error {
 		}
 	}(connection)
 
-	reader := bufio.NewReader(connection)
+	decoder := json.NewDecoder(connection)
+	var message string
 
-	message, err := reader.ReadString('\n')
+	err = decoder.Decode(&message)
 	if err != nil {
 		return err
 	}
 	fmt.Print(message)
-	fmt.Println("Enter messages. Type quit to disconnect")
+	fmt.Println("Enter messages. Type /quit to disconnect")
+	fmt.Print("> ")
 
 	inputDone := make(chan error, 1)
 	serverDone := make(chan error, 1)
@@ -39,18 +42,19 @@ func Client(address string) error {
 		inputDone <- send(connection)
 	}(connection, inputDone)
 
-	go func(reader *bufio.Reader, serverDone chan<- error) {
+	go func(decoder *json.Decoder, serverDone chan<- error) {
 		for {
-			reply, err := reader.ReadString('\n')
+			var reply string
+			err := decoder.Decode(&reply)
 			if err != nil {
 				serverDone <- err
 				return
 			}
 
-			fmt.Print("Reply from server: ", reply)
+			fmt.Print(reply)
 			fmt.Print("> ")
 		}
-	}(reader, serverDone)
+	}(decoder, serverDone)
 
 	select {
 	case err := <-inputDone:
