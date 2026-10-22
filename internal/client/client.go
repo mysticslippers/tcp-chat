@@ -70,7 +70,7 @@ func send(connection net.Conn) error {
 	inputReader := bufio.NewReader(os.Stdin)
 	for {
 		input, err := inputReader.ReadString('\n')
-		if strings.TrimSpace(input) == "quit" {
+		if strings.TrimSpace(input) == "/quit" {
 			return nil
 		}
 		if err == io.EOF {
