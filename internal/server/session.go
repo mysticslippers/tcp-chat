@@ -27,7 +27,7 @@ func (session *Session) Send(message string) error {
 	return session.encoder.Encode(message)
 }
 
-func Handle(connection net.Conn, stop <-chan struct{}) error {
+func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 	defer func(connection net.Conn) {
 		err := connection.Close()
 		if err != nil && !errors.Is(err, net.ErrClosed) {
@@ -61,6 +61,9 @@ func Handle(connection net.Conn, stop <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
+
+	hub.Add(session)
+	defer hub.Remove(session)
 
 	reader := bufio.NewReader(connection)
 	for {
