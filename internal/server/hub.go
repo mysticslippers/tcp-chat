@@ -19,3 +19,10 @@ func (hub *Hub) Add(session *Session) {
 
 	hub.sessions[session] = struct{}{}
 }
+
+func (hub *Hub) Remove(session *Session) {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	delete(hub.sessions, session)
+}
