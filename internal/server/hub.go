@@ -12,3 +12,10 @@ func NewHub() *Hub {
 		sessions: make(map[*Session]struct{}),
 	}
 }
+
+func (hub *Hub) Add(session *Session) {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	hub.sessions[session] = struct{}{}
+}
