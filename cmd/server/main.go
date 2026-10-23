@@ -16,12 +16,14 @@ func main() {
 		log.Fatalf("Unable to start server: %s", err)
 	}
 
+	hub := server.NewHub()
+
 	var handlers sync.WaitGroup
 	stop := make(chan struct{})
 	done := make(chan struct{})
 	shutDownRequested := make(chan struct{})
 
-	go func(listener net.Listener, stop <-chan struct{}, done chan struct{}) {
+	go func(listener net.Listener, stop <-chan struct{}, done chan struct{}, hub *server.Hub) {
 		defer close(done)
 
 		for {
@@ -35,16 +37,16 @@ func main() {
 
 			handlers.Add(1)
 
-			go func(connection net.Conn, stop <-chan struct{}) {
+			go func(connection net.Conn, stop <-chan struct{}, hub *server.Hub) {
 				defer handlers.Done()
 
-				err := server.Handle(connection, stop)
+				err := server.Handle(connection, stop, hub)
 				if err != nil && !errors.Is(err, net.ErrClosed) {
 					log.Printf("Unable to handle connection: %s", err)
 				}
-			}(connection, stop)
+			}(connection, stop, hub)
 		}
-	}(listener, stop, done)
+	}(listener, stop, done, hub)
 
 	go shutdown(shutDownRequested)
 
