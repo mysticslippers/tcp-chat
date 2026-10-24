@@ -71,6 +71,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 		if err == io.EOF {
 			return nil
 		}
+
 		if err != nil {
 			return err
 		}
