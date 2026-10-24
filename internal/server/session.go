@@ -109,6 +109,9 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 		default:
 			session.MessageCount++
 			message = session.Nickname + ": " + message
+
+			hub.Broadcast(message)
+			continue
 		}
 
 		err = session.Send(message)
