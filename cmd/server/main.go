@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	const address = "127.0.0.1:9000"
+	const address = "localhost:9000"
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {

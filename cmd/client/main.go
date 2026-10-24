@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	const address = "127.0.0.1:9000"
+	const address = "localhost:9000"
 
 	err := client.Client(address)
 	if err != nil {
