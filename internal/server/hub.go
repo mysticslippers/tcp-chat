@@ -30,6 +30,17 @@ func (hub *Hub) Remove(session *Session) {
 	delete(hub.sessions, session)
 }
 
+func (hub *Hub) GetNicknames() []*Session {
+	sessions := hub.snapshot()
+	nicknames := make([]string, 0, len(sessions))
+
+	for _, session := range sessions {
+		nicknames = append(nicknames, session.nickname)
+	}
+
+	return sessions
+}
+
 func (hub *Hub) Count() int {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
