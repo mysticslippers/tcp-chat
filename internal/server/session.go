@@ -107,6 +107,14 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			} else {
 				message = "Usage: /nick <name>\n"
 			}
+
+		case "/online":
+			var command commands.Command = commands.OnlineCommand{
+				Count: hub.Count(),
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.Nickname + ": " + message
