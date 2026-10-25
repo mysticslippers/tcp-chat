@@ -22,7 +22,14 @@ type Session struct {
 	mutex   sync.Mutex
 }
 
-func (session *Session) Nickname() string {
+func (session *Session) SetNickname(name string) {
+	session.nameMutex.Lock()
+	defer session.nameMutex.Unlock()
+
+	session.nickname = name
+}
+
+func (session *Session) GetNickname() string {
 	session.nameMutex.Lock()
 	defer session.nameMutex.Unlock()
 
