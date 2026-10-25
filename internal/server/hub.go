@@ -30,6 +30,13 @@ func (hub *Hub) Remove(session *Session) {
 	delete(hub.sessions, session)
 }
 
+func (hub *Hub) Count() int {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	return len(hub.sessions)
+}
+
 func (hub *Hub) Broadcast(message string) {
 	hub.mutex.Lock()
 
