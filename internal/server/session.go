@@ -14,7 +14,9 @@ import (
 
 type Session struct {
 	MessageCount int
-	Nickname     string
+
+	nickname  string
+	nameMutex sync.Mutex
 
 	encoder *json.Encoder
 	mutex   sync.Mutex
@@ -53,7 +55,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
 	session := &Session{
-		Nickname: "guest",
+		nickname: "guest",
 		encoder:  json.NewEncoder(connection),
 	}
 
@@ -100,7 +102,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			if len(parts) == 2 {
 				var command commands.Command = commands.NicknameCommand{
 					Name:   parts[1],
-					Target: &session.Nickname,
+					Target: &session.nickname,
 				}
 
 				message = command.Execute()
@@ -117,7 +119,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 		default:
 			session.MessageCount++
-			message = session.Nickname + ": " + message
+			message = session.nickname + ": " + message
 
 			hub.Broadcast(message)
 			continue
