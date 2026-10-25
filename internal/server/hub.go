@@ -70,3 +70,13 @@ func (hub *Hub) snapshot() []*Session {
 
 	return sessions
 }
+
+func (hub *Hub) isNicknameTaken(name string) bool {
+	for session := range hub.sessions {
+		if session.GetNickname() == name {
+			return true
+		}
+	}
+
+	return false
+}
