@@ -116,7 +116,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			if len(parts) == 2 {
 				var command commands.Command = commands.NicknameCommand{
 					Name:   parts[1],
-					Target: &session.nickname,
+					Target: session,
 				}
 
 				message = command.Execute()
@@ -133,7 +133,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 		default:
 			session.MessageCount++
-			message = session.nickname + ": " + message
+			message = session.GetNickname() + ": " + message
 
 			hub.Broadcast(message)
 			continue
