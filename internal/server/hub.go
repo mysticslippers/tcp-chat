@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
@@ -20,7 +21,17 @@ func (hub *Hub) Add(session *Session) {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	hub.sessions[session] = struct{}{}
+	for number := 1; ; number++ {
+		name := fmt.Sprintf("guest-%d", number)
+
+		if hub.isNicknameTaken(name) {
+			continue
+		}
+
+		session.SetNickname(name)
+		hub.sessions[session] = struct{}{}
+		return
+	}
 }
 
 func (hub *Hub) Remove(session *Session) {
