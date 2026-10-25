@@ -30,7 +30,7 @@ func (hub *Hub) Remove(session *Session) {
 	delete(hub.sessions, session)
 }
 
-func (hub *Hub) GetNicknames() []*Session {
+func (hub *Hub) GetNicknames() []string {
 	sessions := hub.snapshot()
 	nicknames := make([]string, 0, len(sessions))
 
@@ -38,7 +38,7 @@ func (hub *Hub) GetNicknames() []*Session {
 		nicknames = append(nicknames, session.nickname)
 	}
 
-	return sessions
+	return nicknames
 }
 
 func (hub *Hub) Count() int {
