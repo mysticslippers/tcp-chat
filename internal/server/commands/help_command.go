@@ -16,6 +16,7 @@ func (command HelpCommand) Execute() string {
 		"/stats":       "show your message count",
 		"/nick <name>": "change your nickname",
 		"/online":      "show connected client count",
+		"/who":         "show connected nicknames",
 	}
 
 	var items []string
