@@ -131,6 +131,13 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 			message = command.Execute()
 
+		case "/who":
+			var command commands.Command = commands.WhoCommand{
+				Nicknames: hub.GetNicknames(),
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
