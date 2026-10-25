@@ -30,6 +30,7 @@ func (hub *Hub) Add(session *Session) {
 
 		session.SetNickname(name)
 		hub.sessions[session] = struct{}{}
+
 		return
 	}
 }
@@ -46,7 +47,7 @@ func (hub *Hub) GetNicknames() []string {
 	nicknames := make([]string, 0, len(sessions))
 
 	for _, session := range sessions {
-		nicknames = append(nicknames, session.nickname)
+		nicknames = append(nicknames, session.GetNickname())
 	}
 
 	return nicknames
