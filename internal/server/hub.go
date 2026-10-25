@@ -53,3 +53,15 @@ func (hub *Hub) Broadcast(message string) {
 		}
 	}
 }
+
+func (hub *Hub) snapshot() []*Session {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	sessions := make([]*Session, 0, len(hub.sessions))
+	for session := range hub.sessions {
+		sessions = append(sessions, session)
+	}
+
+	return sessions
+}
