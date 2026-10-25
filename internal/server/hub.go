@@ -38,14 +38,8 @@ func (hub *Hub) Count() int {
 }
 
 func (hub *Hub) Broadcast(message string) {
-	hub.mutex.Lock()
+	sessions := hub.snapshot()
 
-	sessions := make([]*Session, 0, len(hub.sessions))
-	for session := range hub.sessions {
-		sessions = append(sessions, session)
-	}
-
-	hub.mutex.Unlock()
 	for _, session := range sessions {
 		err := session.Send(message)
 		if err != nil {
