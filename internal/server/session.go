@@ -22,6 +22,13 @@ type Session struct {
 	mutex   sync.Mutex
 }
 
+func (session *Session) Nickname() string {
+	session.nameMutex.Lock()
+	defer session.nameMutex.Unlock()
+
+	return session.nickname
+}
+
 func (session *Session) Send(message string) error {
 	session.mutex.Lock()
 	defer session.mutex.Unlock()
