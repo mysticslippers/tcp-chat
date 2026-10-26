@@ -28,7 +28,7 @@ func (hub *Hub) Add(session *Session) {
 			continue
 		}
 
-		session.SetNickname(name)
+		session.setNickname(name)
 		hub.sessions[session] = struct{}{}
 
 		return
@@ -43,11 +43,13 @@ func (hub *Hub) Remove(session *Session) {
 }
 
 func (hub *Hub) GetNicknames() []string {
-	sessions := hub.snapshot()
-	nicknames := make([]string, 0, len(sessions))
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
 
-	for _, session := range sessions {
-		nicknames = append(nicknames, session.GetNickname())
+	nicknames := make([]string, 0, len(hub.sessions))
+
+	for session := range hub.sessions {
+		nicknames = append(nicknames, session.nickname)
 	}
 
 	return nicknames
