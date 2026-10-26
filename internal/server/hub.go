@@ -55,6 +55,27 @@ func (hub *Hub) GetNicknames() []string {
 	return nicknames
 }
 
+func (hub *Hub) Rename(session *Session, name string) error {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	_, exist := hub.sessions[session]
+	if !exist {
+		return fmt.Errorf("session is not registered")
+	}
+
+	if session.GetNickname() == name {
+		return nil
+	}
+
+	if hub.isNicknameTaken(name) {
+		return fmt.Errorf("nickname %q is already taken", name)
+	}
+
+	session.setNickname(name)
+	return nil
+}
+
 func (hub *Hub) Count() int {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
