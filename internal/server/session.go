@@ -15,6 +15,7 @@ import (
 type Session struct {
 	MessageCount int
 
+	hub       *Hub
 	nickname  string
 	nameMutex sync.Mutex
 
@@ -22,7 +23,11 @@ type Session struct {
 	mutex   sync.Mutex
 }
 
-func (session *Session) SetNickname(name string) {
+func (session *Session) SetNickname(name string) error {
+	return session.hub.Rename(session, name)
+}
+
+func (session *Session) setNickname(name string) {
 	session.nameMutex.Lock()
 	defer session.nameMutex.Unlock()
 
@@ -69,8 +74,8 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
 	session := &Session{
-		nickname: "guest",
-		encoder:  json.NewEncoder(connection),
+		hub:     hub,
+		encoder: json.NewEncoder(connection),
 	}
 
 	err := session.Send("You have successfully connected to the server\n")
