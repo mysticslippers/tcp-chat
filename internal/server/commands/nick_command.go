@@ -3,7 +3,7 @@ package commands
 import "fmt"
 
 type NicknameSetter interface {
-	SetNickname(name string)
+	SetNickname(name string) error
 }
 
 type NicknameCommand struct {
@@ -12,7 +12,10 @@ type NicknameCommand struct {
 }
 
 func (command NicknameCommand) Execute() string {
-	command.Target.SetNickname(command.Name)
+	err := command.Target.SetNickname(command.Name)
+	if err != nil {
+		return fmt.Sprintf("Unable to change nickname: %s\n", err)
+	}
 
 	return fmt.Sprintf("Nickname changed to %s\n", command.Name)
 }
