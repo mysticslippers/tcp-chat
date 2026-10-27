@@ -143,6 +143,31 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 			message = command.Execute()
 
+		case "/msg":
+			if len(parts) != 3 {
+				message = "Usage: /msg <nickname> <message>\n"
+				break
+			}
+
+			recipient := hub.FindByNickname(parts[1])
+			if recipient == nil {
+				message = "User " + parts[1] + " is not online\n"
+				break
+			}
+
+			text := strings.TrimSpace(message)
+			text = strings.TrimSpace(strings.TrimPrefix(text, parts[0]))
+			text = strings.TrimSpace(strings.TrimPrefix(text, parts[1]))
+
+			var command commands.Command = commands.MessageCommand{
+				SenderName:   session.GetNickname(),
+				ReceiverName: parts[1],
+				Message:      text,
+				Target:       recipient,
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
