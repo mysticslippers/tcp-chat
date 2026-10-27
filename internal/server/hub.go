@@ -94,6 +94,19 @@ func (hub *Hub) Broadcast(message string) {
 	}
 }
 
+func (hub *Hub) FindByNickname(nickname string) *Session {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	for session := range hub.sessions {
+		if session.GetNickname() == nickname {
+			return session
+		}
+	}
+
+	return nil
+}
+
 func (hub *Hub) snapshot() []*Session {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
