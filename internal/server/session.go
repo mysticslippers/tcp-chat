@@ -144,7 +144,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			message = command.Execute()
 
 		case "/msg":
-			if len(parts) != 3 {
+			if len(parts) < 3 {
 				message = "Usage: /msg <nickname> <message>\n"
 				break
 			}
