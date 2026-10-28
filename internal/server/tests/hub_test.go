@@ -34,3 +34,37 @@ func TestHubRejectsTakenNickname(t *testing.T) {
 		t.Fatal("first client lost its nickname")
 	}
 }
+
+func TestHubReusesFreedGuestNickname(t *testing.T) {
+	hub := server.NewHub()
+
+	first := &server.Session{}
+	second := &server.Session{}
+
+	hub.Add(first)
+	hub.Add(second)
+
+	if first.GetNickname() != "guest-1" {
+		t.Fatalf("expected guest-1, got %q", first.GetNickname())
+	}
+
+	if second.GetNickname() != "guest-2" {
+		t.Fatalf("expected guest-2, got %q", second.GetNickname())
+	}
+
+	hub.Remove(first)
+
+	third := &server.Session{}
+	hub.Add(third)
+
+	if third.GetNickname() != "guest-1" {
+		t.Fatalf(
+			"expected freed nickname guest-1, got %q",
+			third.GetNickname(),
+		)
+	}
+
+	if second.GetNickname() != "guest-2" {
+		t.Fatal("existing client's nickname changed")
+	}
+}
