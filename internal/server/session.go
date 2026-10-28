@@ -10,7 +10,10 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 )
+
+const writeTimeout = 5 * time.Second
 
 type Session struct {
 	MessageCount int
@@ -19,8 +22,9 @@ type Session struct {
 	nickname  string
 	nameMutex sync.Mutex
 
-	encoder *json.Encoder
-	mutex   sync.Mutex
+	encoder    *json.Encoder
+	mutex      sync.Mutex
+	connection net.Conn
 }
 
 func (session *Session) SetNickname(name string) error {
@@ -45,7 +49,20 @@ func (session *Session) Send(message string) error {
 	session.mutex.Lock()
 	defer session.mutex.Unlock()
 
-	return session.encoder.Encode(message)
+	err := session.connection.SetWriteDeadline(time.Now().Add(writeTimeout))
+	if err != nil {
+		return err
+	}
+
+	err = session.encoder.Encode(message)
+	if err != nil {
+		closeErr := session.connection.Close()
+		if closeErr != nil && !errors.Is(closeErr, net.ErrClosed) {
+			log.Printf("Error closing connection: %s", closeErr)
+		}
+	}
+
+	return err
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
@@ -74,8 +91,9 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
 	session := &Session{
-		hub:     hub,
-		encoder: json.NewEncoder(connection),
+		hub:        hub,
+		connection: connection,
+		encoder:    json.NewEncoder(connection),
 	}
 
 	err := session.Send("You have successfully connected to the server\n")
