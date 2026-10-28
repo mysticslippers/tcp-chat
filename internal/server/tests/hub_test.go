@@ -1,24 +1,27 @@
-package server
+package tests
 
-import "testing"
+import (
+	"Chat/internal/server"
+	"testing"
+)
 
 func TestHubRejectsTakenNickname(t *testing.T) {
-	hub := NewHub()
+	hub := server.NewHub()
 
-	first := &Session{hub: hub}
-	second := &Session{hub: hub}
+	first := &server.Session{}
+	second := &server.Session{}
 
 	hub.Add(first)
 	hub.Add(second)
 
-	err := first.SetNickname("alex")
+	err := hub.Rename(first, "alex")
 	if err != nil {
 		t.Fatalf("unable to set first nickname: %v", err)
 	}
 
 	previousName := second.GetNickname()
 
-	err = second.SetNickname("alex")
+	err = hub.Rename(second, "alex")
 	if err == nil {
 		t.Fatal("expected an error when taking an occupied nickname")
 	}
