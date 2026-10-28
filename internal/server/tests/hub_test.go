@@ -68,3 +68,47 @@ func TestHubReusesFreedGuestNickname(t *testing.T) {
 		t.Fatal("existing client's nickname changed")
 	}
 }
+
+func TestHubConcurrentRename(t *testing.T) {
+	hub := server.NewHub()
+
+	first := &server.Session{}
+	second := &server.Session{}
+
+	hub.Add(first)
+	hub.Add(second)
+
+	start := make(chan struct{})
+	results := make(chan error, 2)
+
+	rename := func(session *server.Session) {
+		<-start
+		results <- hub.Rename(session, "alex")
+	}
+
+	go rename(first)
+	go rename(second)
+
+	close(start)
+
+	successes := 0
+
+	for attempt := 0; attempt < 2; attempt++ {
+		err := <-results
+		if err == nil {
+			successes++
+		}
+	}
+
+	if successes != 1 {
+		t.Fatalf("expected one successful rename, got %d", successes)
+	}
+
+	if first.GetNickname() == second.GetNickname() {
+		t.Fatal("clients ended up with identical nicknames")
+	}
+
+	if hub.FindByNickname("alex") == nil {
+		t.Fatal("nickname alex has no owner")
+	}
+}
