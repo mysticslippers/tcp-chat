@@ -42,15 +42,17 @@ func (session *Session) isClosed() bool {
 	}
 }
 
-func (session *Session) close() {
-	session.closeOnce.Do(func() {
-		close(session.done)
+func (session *Session) closeResources() {
+	close(session.done)
 
-		err := session.connection.Close()
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			log.Printf("Error closing connection: %s", err)
-		}
-	})
+	err := session.connection.Close()
+	if err != nil && !errors.Is(err, net.ErrClosed) {
+		log.Printf("Error closing connection: %s", err)
+	}
+}
+
+func (session *Session) close() {
+	session.closeOnce.Do(session.closeResources)
 }
 
 func (session *Session) writeLoop() {
