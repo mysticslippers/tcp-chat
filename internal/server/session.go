@@ -33,6 +33,15 @@ type Session struct {
 	outgoing   chan string
 }
 
+func (session *Session) isClosed() bool {
+	select {
+	case <-session.done:
+		return true
+	default:
+		return false
+	}
+}
+
 func (session *Session) close() {
 	session.closeOnce.Do(func() {
 		close(session.done)
@@ -104,11 +113,8 @@ func (session *Session) GetNickname() string {
 }
 
 func (session *Session) Send(message string) error {
-	select {
-	case <-session.done:
+	if session.isClosed() {
 		return net.ErrClosed
-
-	default:
 	}
 
 	select {
