@@ -190,6 +190,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
 
+			hub.SaveMessage(message)
 			hub.Broadcast(message)
 			continue
 		}
