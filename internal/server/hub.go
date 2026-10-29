@@ -125,7 +125,7 @@ func (hub *Hub) GetHistory() []string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	history := make([]string, 0, len(hub.history))
+	history := make([]string, len(hub.history))
 	copy(history, hub.history)
 
 	return history
