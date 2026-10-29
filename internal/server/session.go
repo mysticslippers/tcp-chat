@@ -186,6 +186,10 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 			message = command.Execute()
 
+		case "/history":
+			var command commands.Command = commands.NewHistoryCommand(hub)
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
