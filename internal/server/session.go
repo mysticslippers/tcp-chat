@@ -96,7 +96,12 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 		encoder:    json.NewEncoder(connection),
 	}
 
-	err := session.Send("You have successfully connected to the server\n")
+	var historyCommand commands.Command = commands.NewHistoryCommand(hub)
+
+	welcome := "You have successfully connected to the server\n"
+	welcome += historyCommand.Execute()
+
+	err := session.Send(welcome)
 	if err != nil {
 		return err
 	}
