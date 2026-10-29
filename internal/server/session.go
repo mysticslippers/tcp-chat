@@ -164,10 +164,10 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 	go session.writeLoop()
 
-	defer func() {
+	defer func(session *Session) {
 		session.close()
 		<-session.writerDone
-	}()
+	}(session)
 
 	hub.Add(session)
 	defer hub.Remove(session)
