@@ -22,11 +22,11 @@ type Session struct {
 	MessageCount int
 	nameMutex    sync.Mutex
 
-	hub       *Hub
-	nickname  string
-	done      chan struct{}
-	writeDone chan struct{}
-	closeOnce sync.Once
+	hub        *Hub
+	nickname   string
+	done       chan struct{}
+	writerDone chan struct{}
+	closeOnce  sync.Once
 
 	encoder    *json.Encoder
 	connection net.Conn
@@ -45,7 +45,7 @@ func (session *Session) close() {
 }
 
 func (session *Session) writeLoop() {
-	defer close(session.writeDone)
+	defer close(session.writerDone)
 
 	for {
 		select {
@@ -125,46 +125,43 @@ func (session *Session) Send(message string) error {
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
-	defer func(connection net.Conn) {
-		err := connection.Close()
-		if err != nil && !errors.Is(err, net.ErrClosed) {
-			log.Printf("Error closing connection: %s", err)
-		}
-	}(connection)
-
-	done := make(chan struct{})
-	defer close(done)
-
-	go func(connection net.Conn) {
-		select {
-		case <-stop:
-			err := connection.Close()
-			if err != nil && !errors.Is(err, net.ErrClosed) {
-				log.Printf("Error closing connection: %s", err)
-			}
-
-		case <-done:
-		}
-	}(connection)
-
-	log.Printf("Accepted connection from %s", connection.RemoteAddr())
-
 	session := &Session{
 		hub:        hub,
 		connection: connection,
 		encoder:    json.NewEncoder(connection),
 		outgoing:   make(chan string, outgoingQueueSize),
+		done:       make(chan struct{}),
+		writerDone: make(chan struct{}),
 	}
+
+	defer session.close()
+
+	go func(session *Session, stop <-chan struct{}) {
+		select {
+		case <-stop:
+			session.close()
+		case <-session.done:
+		}
+	}(session, stop)
+
+	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
 	var historyCommand commands.Command = commands.NewHistoryCommand(hub)
 
 	welcome := "You have successfully connected to the server\n"
 	welcome += historyCommand.Execute()
 
-	err := session.Send(welcome)
+	err := session.write(welcome)
 	if err != nil {
 		return err
 	}
+
+	go session.writeLoop()
+
+	defer func() {
+		session.close()
+		<-session.writerDone
+	}()
 
 	hub.Add(session)
 	defer hub.Remove(session)
