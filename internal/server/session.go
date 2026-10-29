@@ -31,6 +31,23 @@ type Session struct {
 	outgoing   chan string
 }
 
+func (session *Session) write(message string) error {
+	err := session.connection.SetWriteDeadline(time.Now().Add(writeTimeout))
+	if err != nil {
+		return err
+	}
+
+	err = session.encoder.Encode(message)
+	if err != nil {
+		closeErr := session.connection.Close()
+		if closeErr != nil && !errors.Is(closeErr, net.ErrClosed) {
+			log.Printf("Error closing connection: %s", closeErr)
+		}
+	}
+
+	return err
+}
+
 func (session *Session) SetNickname(name string) error {
 	return session.hub.Rename(session, name)
 }
@@ -53,20 +70,7 @@ func (session *Session) Send(message string) error {
 	session.mutex.Lock()
 	defer session.mutex.Unlock()
 
-	err := session.connection.SetWriteDeadline(time.Now().Add(writeTimeout))
-	if err != nil {
-		return err
-	}
-
-	err = session.encoder.Encode(message)
-	if err != nil {
-		closeErr := session.connection.Close()
-		if closeErr != nil && !errors.Is(closeErr, net.ErrClosed) {
-			log.Printf("Error closing connection: %s", closeErr)
-		}
-	}
-
-	return err
+	return session.write(message)
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
