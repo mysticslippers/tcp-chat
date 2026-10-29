@@ -7,3 +7,9 @@ type History interface {
 type HistoryCommand struct {
 	history History
 }
+
+func NewHistoryCommand(history History) *HistoryCommand {
+	return &HistoryCommand{
+		history: history,
+	}
+}
