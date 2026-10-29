@@ -121,6 +121,16 @@ func (hub *Hub) SaveMessage(message string) {
 	}
 }
 
+func (hub *Hub) GetHistory() []string {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	history := make([]string, 0, len(hub.history))
+	copy(history, hub.history)
+
+	return history
+}
+
 func (hub *Hub) snapshot() []*Session {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
