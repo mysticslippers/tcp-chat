@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
-const writeTimeout = 5 * time.Second
+const (
+	writeTimeout      = 5 * time.Second
+	outgoingQueueSize = 32
+)
 
 type Session struct {
 	MessageCount int
@@ -25,6 +28,7 @@ type Session struct {
 	encoder    *json.Encoder
 	mutex      sync.Mutex
 	connection net.Conn
+	outgoing   chan string
 }
 
 func (session *Session) SetNickname(name string) error {
@@ -94,6 +98,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 		hub:        hub,
 		connection: connection,
 		encoder:    json.NewEncoder(connection),
+		outgoing:   make(chan string, outgoingQueueSize),
 	}
 
 	var historyCommand commands.Command = commands.NewHistoryCommand(hub)
