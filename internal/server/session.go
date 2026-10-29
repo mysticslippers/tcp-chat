@@ -23,12 +23,25 @@ type Session struct {
 
 	hub       *Hub
 	nickname  string
-	nameMutex sync.Mutex
+	done      chan struct{}
+	writeDone chan struct{}
+	closeOnce sync.Once
 
 	encoder    *json.Encoder
 	mutex      sync.Mutex
 	connection net.Conn
 	outgoing   chan string
+}
+
+func (session *Session) close() {
+	session.closeOnce.Do(func() {
+		close(session.done)
+
+		err := session.connection.Close()
+		if err != nil && !errors.Is(err, net.ErrClosed) {
+			log.Printf("Error closing connection: %s", err)
+		}
+	})
 }
 
 func (session *Session) write(message string) error {
