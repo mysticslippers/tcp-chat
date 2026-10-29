@@ -85,15 +85,7 @@ func (session *Session) write(message string) error {
 		return err
 	}
 
-	err = session.encoder.Encode(message)
-	if err != nil {
-		closeErr := session.connection.Close()
-		if closeErr != nil && !errors.Is(closeErr, net.ErrClosed) {
-			log.Printf("Error closing connection: %s", closeErr)
-		}
-	}
-
-	return err
+	return session.encoder.Encode(message)
 }
 
 func (session *Session) SetNickname(name string) error {
