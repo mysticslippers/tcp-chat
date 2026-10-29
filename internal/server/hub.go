@@ -6,8 +6,11 @@ import (
 	"sync"
 )
 
+const historyLimit = 20
+
 type Hub struct {
 	mutex    sync.Mutex
+	history  []string
 	sessions map[*Session]struct{}
 }
 
@@ -105,6 +108,17 @@ func (hub *Hub) FindByNickname(nickname string) *Session {
 	}
 
 	return nil
+}
+
+func (hub *Hub) SaveMessage(message string) {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	hub.history = append(hub.history, message)
+
+	if len(hub.history) > historyLimit {
+		hub.history = hub.history[1:]
+	}
 }
 
 func (hub *Hub) snapshot() []*Session {
