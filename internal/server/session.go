@@ -20,6 +20,7 @@ const (
 
 type Session struct {
 	MessageCount int
+	nameMutex    sync.Mutex
 
 	hub       *Hub
 	nickname  string
@@ -28,7 +29,6 @@ type Session struct {
 	closeOnce sync.Once
 
 	encoder    *json.Encoder
-	mutex      sync.Mutex
 	connection net.Conn
 	outgoing   chan string
 }
@@ -104,10 +104,24 @@ func (session *Session) GetNickname() string {
 }
 
 func (session *Session) Send(message string) error {
-	session.mutex.Lock()
-	defer session.mutex.Unlock()
+	select {
+	case <-session.done:
+		return net.ErrClosed
 
-	return session.write(message)
+	default:
+	}
+
+	select {
+	case <-session.done:
+		return net.ErrClosed
+
+	case session.outgoing <- message:
+		return nil
+
+	default:
+		session.close()
+		return errors.New("outgoing message queue is full")
+	}
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
