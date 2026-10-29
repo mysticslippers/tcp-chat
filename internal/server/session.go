@@ -44,6 +44,30 @@ func (session *Session) close() {
 	})
 }
 
+func (session *Session) writeLoop() {
+	defer close(session.writeDone)
+
+	for {
+		select {
+		case <-session.done:
+			return
+
+		case message := <-session.outgoing:
+			err := session.write(message)
+			if err != nil {
+				session.close()
+
+				if !errors.Is(err, net.ErrClosed) {
+					log.Printf("Unable to send message: %s", err)
+				}
+
+				return
+			}
+		}
+
+	}
+}
+
 func (session *Session) write(message string) error {
 	err := session.connection.SetWriteDeadline(time.Now().Add(writeTimeout))
 	if err != nil {
