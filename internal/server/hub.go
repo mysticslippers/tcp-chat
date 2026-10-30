@@ -110,14 +110,6 @@ func (hub *Hub) FindByNickname(nickname string) *Session {
 	return nil
 }
 
-func (hub *Hub) saveMessageLocked(message string) {
-	hub.history = append(hub.history, message)
-
-	if len(hub.history) > historyLimit {
-		hub.history = hub.history[1:]
-	}
-}
-
 func (hub *Hub) SaveMessage(message string) {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
@@ -133,6 +125,27 @@ func (hub *Hub) GetHistory() []string {
 	copy(history, hub.history)
 
 	return history
+}
+
+func (hub *Hub) Publish(message string) {
+	var failed []*Session
+
+	hub.mutex.Lock()
+	hub.saveMessageLocked(message)
+
+	for session := range hub.sessions {
+		err := session.enqueue(message)
+		if err != nil {
+			failed = append(failed, session)
+		}
+	}
+
+	hub.mutex.Unlock()
+	for _, session := range failed {
+		log.Printf("Unable to queue message for %q; closing session", session.GetNickname())
+
+		session.close()
+	}
 }
 
 func (hub *Hub) snapshot() []*Session {
@@ -155,4 +168,12 @@ func (hub *Hub) isNicknameTaken(name string) bool {
 	}
 
 	return false
+}
+
+func (hub *Hub) saveMessageLocked(message string) {
+	hub.history = append(hub.history, message)
+
+	if len(hub.history) > historyLimit {
+		hub.history = hub.history[1:]
+	}
 }
