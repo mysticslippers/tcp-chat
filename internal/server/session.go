@@ -106,6 +106,24 @@ func (session *Session) GetNickname() string {
 	return session.nickname
 }
 
+func (session *Session) enqueue(message string) error {
+	if session.isClosed() {
+		return net.ErrClosed
+	}
+
+	select {
+	case <-session.done:
+		return net.ErrClosed
+
+	case session.outgoing <- message:
+		return nil
+
+	default:
+		session.close()
+		return errors.New("outgoing message queue is full")
+	}
+}
+
 func (session *Session) Send(message string) error {
 	if session.isClosed() {
 		return net.ErrClosed
