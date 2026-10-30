@@ -17,8 +17,10 @@ func NewHistoryCommand(history History) *HistoryCommand {
 }
 
 func (command *HistoryCommand) Execute() string {
-	history := command.history.GetHistory()
+	return FormatHistory(command.history.GetHistory())
+}
 
+func FormatHistory(history []string) string {
 	if len(history) == 0 {
 		return "Chat history is empty\n"
 	}
