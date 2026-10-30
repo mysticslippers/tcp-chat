@@ -121,6 +121,8 @@ func (hub *Hub) saveMessageLocked(message string) {
 func (hub *Hub) SaveMessage(message string) {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
+
+	hub.saveMessageLocked(message)
 }
 
 func (hub *Hub) GetHistory() []string {
