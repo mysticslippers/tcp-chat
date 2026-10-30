@@ -110,15 +110,17 @@ func (hub *Hub) FindByNickname(nickname string) *Session {
 	return nil
 }
 
-func (hub *Hub) SaveMessage(message string) {
-	hub.mutex.Lock()
-	defer hub.mutex.Unlock()
-
+func (hub *Hub) saveMessageLocked(message string) {
 	hub.history = append(hub.history, message)
 
 	if len(hub.history) > historyLimit {
 		hub.history = hub.history[1:]
 	}
+}
+
+func (hub *Hub) SaveMessage(message string) {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
 }
 
 func (hub *Hub) GetHistory() []string {
