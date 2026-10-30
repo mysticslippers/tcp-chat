@@ -125,21 +125,12 @@ func (session *Session) enqueue(message string) error {
 }
 
 func (session *Session) Send(message string) error {
-	if session.isClosed() {
-		return net.ErrClosed
-	}
-
-	select {
-	case <-session.done:
-		return net.ErrClosed
-
-	case session.outgoing <- message:
-		return nil
-
-	default:
+	err := session.enqueue(message)
+	if err != nil {
 		session.close()
-		return errors.New("outgoing message queue is full")
 	}
+
+	return err
 }
 
 func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
