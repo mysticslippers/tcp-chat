@@ -119,7 +119,6 @@ func (session *Session) enqueue(message string) error {
 		return nil
 
 	default:
-		session.close()
 		return errors.New("outgoing message queue is full")
 	}
 }
@@ -155,10 +154,11 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 	log.Printf("Accepted connection from %s", connection.RemoteAddr())
 
-	var historyCommand commands.Command = commands.NewHistoryCommand(hub)
+	history := hub.Add(session)
+	defer hub.Remove(session)
 
 	welcome := "You have successfully connected to the server\n"
-	welcome += historyCommand.Execute()
+	welcome += commands.FormatHistory(history)
 
 	err := session.write(welcome)
 	if err != nil {
