@@ -20,7 +20,7 @@ func NewHub() *Hub {
 	}
 }
 
-func (hub *Hub) Add(session *Session) {
+func (hub *Hub) Add(session *Session) []string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
@@ -33,9 +33,13 @@ func (hub *Hub) Add(session *Session) {
 
 		session.setNickname(name)
 		hub.sessions[session] = struct{}{}
-
-		return
+		break
 	}
+
+	history := make([]string, len(hub.history))
+	copy(history, hub.history)
+
+	return history
 }
 
 func (hub *Hub) Remove(session *Session) {
