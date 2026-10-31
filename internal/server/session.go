@@ -172,9 +172,6 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 		<-session.writerDone
 	}(session)
 
-	hub.Add(session)
-	defer hub.Remove(session)
-
 	reader := bufio.NewReader(connection)
 	for {
 		message, err := reader.ReadString('\n')
