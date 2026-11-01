@@ -5,3 +5,10 @@ type Room struct {
 	history  []string
 	sessions map[string]*Session
 }
+
+func newRoom(name string) *Room {
+	return &Room{
+		name:     name,
+		sessions: make(map[string]*Session),
+	}
+}
