@@ -19,6 +19,7 @@ func (command HelpCommand) Execute() string {
 		"/who":                      "show connected nicknames",
 		"/msg <nickname> <message>": "send a private message",
 		"/history":                  "show recent public messages",
+		"/rooms":                    "show rooms and participant counts",
 	}
 
 	var items []string
