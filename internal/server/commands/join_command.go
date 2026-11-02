@@ -1,5 +1,10 @@
 package commands
 
-type JoinCommand interface {
+type RoomJoiner interface {
 	JoinRoom(name string) error
+}
+
+type JoinCommand struct {
+	Name   string
+	Target RoomJoiner
 }
