@@ -15,6 +15,7 @@ type Hub struct {
 	mutex    sync.Mutex
 	history  []string
 	sessions map[*Session]struct{}
+	rooms    map[string]*Room
 }
 
 func NewHub() *Hub {
