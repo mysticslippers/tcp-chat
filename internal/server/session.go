@@ -259,6 +259,13 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			var command commands.Command = commands.NewHistoryCommand(hub)
 			message = command.Execute()
 
+		case "/rooms":
+			var command commands.Command = commands.RoomsCommand{
+				Rooms: hub.GetRooms(),
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
