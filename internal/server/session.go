@@ -124,6 +124,10 @@ func (session *Session) enqueue(message string) error {
 	}
 }
 
+func (session *Session) JoinRoom(name string) error {
+	return session.hub.Join(session, name)
+}
+
 func (session *Session) Send(message string) error {
 	err := session.enqueue(message)
 	if err != nil {
