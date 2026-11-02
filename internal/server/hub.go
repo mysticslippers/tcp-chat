@@ -6,7 +6,10 @@ import (
 	"sync"
 )
 
-const historyLimit = 20
+const (
+	historyLimit    = 20
+	defaultRoomName = "general"
+)
 
 type Hub struct {
 	mutex    sync.Mutex
