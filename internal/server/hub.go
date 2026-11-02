@@ -40,6 +40,9 @@ func (hub *Hub) Add(session *Session) []string {
 
 		session.setNickname(name)
 		hub.sessions[session] = struct{}{}
+		room := hub.rooms[defaultRoomName]
+		room.sessions[session] = struct{}{}
+		session.room = room
 		break
 	}
 
