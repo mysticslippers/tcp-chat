@@ -270,6 +270,19 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 			message = command.Execute()
 
+		case "/join":
+			if len(parts) != 2 {
+				message = "Usage: /join <name>\n"
+				break
+			}
+
+			var command commands.Command = commands.JoinCommand{
+				Name:   parts[1],
+				Target: session,
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
