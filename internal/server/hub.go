@@ -13,7 +13,6 @@ const (
 
 type Hub struct {
 	mutex    sync.Mutex
-	history  []string
 	sessions map[*Session]struct{}
 	rooms    map[string]*Room
 }
@@ -46,8 +45,8 @@ func (hub *Hub) Add(session *Session) []string {
 		break
 	}
 
-	history := make([]string, len(hub.history))
-	copy(history, hub.history)
+	history := make([]string, len(session.room.history))
+	copy(history, session.room.history)
 
 	return history
 }
@@ -133,15 +132,32 @@ func (hub *Hub) SaveMessage(message string) {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	hub.saveMessageLocked(message)
+	hub.saveMessageLocked(hub.rooms[defaultRoomName], message)
 }
 
 func (hub *Hub) GetHistory() []string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	history := make([]string, len(hub.history))
-	copy(history, hub.history)
+	room := hub.rooms[defaultRoomName]
+
+	history := make([]string, len(room.history))
+	copy(history, room.history)
+
+	return history
+}
+
+func (hub *Hub) GetRoomHistory(session *Session) []string {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	room := session.room
+	if room == nil {
+		return nil
+	}
+
+	history := make([]string, len(room.history))
+	copy(history, room.history)
 
 	return history
 }
@@ -159,22 +175,33 @@ func (hub *Hub) GetRooms() map[string]int {
 	return rooms
 }
 
-func (hub *Hub) Publish(message string) {
+func (hub *Hub) Publish(sender *Session, message string) {
 	var failed []*Session
 
 	hub.mutex.Lock()
-	hub.saveMessageLocked(message)
 
-	for session := range hub.sessions {
-		err := session.enqueue(message)
+	room := sender.room
+	if room == nil {
+		hub.mutex.Unlock()
+		return
+	}
+
+	hub.saveMessageLocked(room, message)
+
+	for recipient := range room.sessions {
+		err := recipient.enqueue(message)
 		if err != nil {
-			failed = append(failed, session)
+			failed = append(failed, recipient)
 		}
 	}
 
 	hub.mutex.Unlock()
+
 	for _, session := range failed {
-		log.Printf("Unable to queue message for %q; closing session", session.GetNickname())
+		log.Printf(
+			"Unable to queue message for %q; closing session",
+			session.GetNickname(),
+		)
 
 		session.close()
 	}
@@ -236,10 +263,10 @@ func (hub *Hub) isNicknameTaken(name string) bool {
 	return false
 }
 
-func (hub *Hub) saveMessageLocked(message string) {
-	hub.history = append(hub.history, message)
+func (hub *Hub) saveMessageLocked(room *Room, message string) {
+	room.history = append(room.history, message)
 
-	if len(hub.history) > historyLimit {
-		hub.history = hub.history[1:]
+	if len(room.history) > historyLimit {
+		room.history = room.history[1:]
 	}
 }
