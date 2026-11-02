@@ -57,6 +57,11 @@ func (hub *Hub) Remove(session *Session) {
 	defer hub.mutex.Unlock()
 
 	delete(hub.sessions, session)
+
+	if session.room != nil {
+		delete(session.room.sessions, session)
+		session.room = nil
+	}
 }
 
 func (hub *Hub) GetNicknames() []string {
