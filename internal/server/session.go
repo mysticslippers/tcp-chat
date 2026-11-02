@@ -23,6 +23,7 @@ type Session struct {
 	nameMutex    sync.Mutex
 
 	hub        *Hub
+	room       *Room
 	nickname   string
 	done       chan struct{}
 	writerDone chan struct{}
