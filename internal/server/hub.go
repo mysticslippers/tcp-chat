@@ -21,6 +21,9 @@ type Hub struct {
 func NewHub() *Hub {
 	return &Hub{
 		sessions: make(map[*Session]struct{}),
+		rooms: map[string]*Room{
+			defaultRoomName: newRoom(defaultRoomName),
+		},
 	}
 }
 
