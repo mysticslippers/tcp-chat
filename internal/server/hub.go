@@ -192,6 +192,40 @@ func (hub *Hub) snapshot() []*Session {
 	return sessions
 }
 
+func (hub *Hub) Join(session *Session, name string) error {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	if name == "" {
+		return fmt.Errorf("room name must not be empty")
+	}
+
+	_, exists := hub.sessions[session]
+
+	if !exists {
+		return fmt.Errorf("session is not registered")
+	}
+
+	room, exist := hub.rooms[name]
+	if !exist {
+		room = newRoom(name)
+		hub.rooms[name] = room
+	}
+
+	if session.room == room {
+		return nil
+	}
+
+	if session.room != nil {
+		delete(session.room.sessions, session)
+	}
+
+	room.sessions[session] = struct{}{}
+	session.room = room
+
+	return nil
+}
+
 func (hub *Hub) isNicknameTaken(name string) bool {
 	for session := range hub.sessions {
 		if session.GetNickname() == name {
