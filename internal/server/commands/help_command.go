@@ -18,7 +18,7 @@ func (command HelpCommand) Execute() string {
 		"/online":                   "show connected client count",
 		"/who":                      "show connected nicknames",
 		"/msg <nickname> <message>": "send a private message",
-		"/history":                  "show recent public messages",
+		"/history":                  "show recent messages in your room",
 		"/rooms":                    "show rooms and participant counts",
 		"/join <name>":              "join or create a room",
 	}
