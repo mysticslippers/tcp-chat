@@ -107,6 +107,10 @@ func (session *Session) GetNickname() string {
 	return session.nickname
 }
 
+func (session *Session) GetHistory() []string {
+	return session.hub.GetRoomHistory(session)
+}
+
 func (session *Session) enqueue(message string) error {
 	if session.isClosed() {
 		return net.ErrClosed
@@ -260,7 +264,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			message = command.Execute()
 
 		case "/history":
-			var command commands.Command = commands.NewHistoryCommand(hub)
+			var command commands.Command = commands.NewHistoryCommand(session)
 			message = command.Execute()
 
 		case "/rooms":
@@ -287,7 +291,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
 
-			hub.Publish(message)
+			hub.Publish(session, message)
 			continue
 		}
 
