@@ -63,7 +63,7 @@ func (hub *Hub) Remove(session *Session) {
 	}
 }
 
-func (hub *Hub) GetNicknames(session *Session) []string {
+func (hub *Hub) GetRoomNicknames(session *Session) []string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
