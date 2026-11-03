@@ -162,6 +162,17 @@ func (hub *Hub) GetRoomHistory(session *Session) []string {
 	return history
 }
 
+func (hub *Hub) GetRoomName(session *Session) string {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	if session == nil {
+		return ""
+	}
+
+	return session.room.name
+}
+
 func (hub *Hub) GetRooms() map[string]int {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
