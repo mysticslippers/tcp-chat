@@ -291,6 +291,13 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 			message = command.Execute()
 
+		case "/where":
+			var command commands.Command = commands.WhereCommand{
+				RoomName: session.GetRoomName(),
+			}
+
+			message = command.Execute()
+
 		default:
 			session.MessageCount++
 			message = session.GetNickname() + ": " + message
