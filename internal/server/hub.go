@@ -63,14 +63,19 @@ func (hub *Hub) Remove(session *Session) {
 	}
 }
 
-func (hub *Hub) GetNicknames() []string {
+func (hub *Hub) GetNicknames(session *Session) []string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	nicknames := make([]string, 0, len(hub.sessions))
+	room := session.room
+	if room == nil {
+		return nil
+	}
 
-	for session := range hub.sessions {
-		nicknames = append(nicknames, session.nickname)
+	nicknames := make([]string, 0, len(room.sessions))
+
+	for participant := range room.sessions {
+		nicknames = append(nicknames, participant.GetNickname())
 	}
 
 	return nicknames
