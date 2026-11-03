@@ -107,6 +107,10 @@ func (session *Session) GetNickname() string {
 	return session.nickname
 }
 
+func (session *Session) GetRoomNicknames() []string {
+	return session.hub.GetRoomNicknames(session)
+}
+
 func (session *Session) GetHistory() []string {
 	return session.hub.GetRoomHistory(session)
 }
@@ -237,7 +241,7 @@ func Handle(connection net.Conn, stop <-chan struct{}, hub *Hub) error {
 
 		case "/who":
 			var command commands.Command = commands.WhoCommand{
-				Nicknames: hub.GetNicknames(),
+				Nicknames: session.GetRoomNicknames(),
 			}
 
 			message = command.Execute()
