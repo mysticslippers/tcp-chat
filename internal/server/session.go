@@ -111,6 +111,10 @@ func (session *Session) GetHistory() []string {
 	return session.hub.GetRoomHistory(session)
 }
 
+func (session *Session) GetRoomName() string {
+	return session.hub.GetRoomName(session)
+}
+
 func (session *Session) enqueue(message string) error {
 	if session.isClosed() {
 		return net.ErrClosed
