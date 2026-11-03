@@ -21,6 +21,7 @@ func (command HelpCommand) Execute() string {
 		"/history":                  "show recent messages in your room",
 		"/rooms":                    "show rooms and participant counts",
 		"/join <name>":              "join or create a room",
+		"/where":                    "show your current room",
 	}
 
 	var items []string
