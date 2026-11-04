@@ -102,6 +102,39 @@ func (hub *Hub) Rename(session *Session, name string) error {
 	return nil
 }
 
+func (hub *Hub) RestoreHistory(history map[string][]string) error {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	if len(hub.sessions) > 0 {
+		return fmt.Errorf("cannot restore history with connected clients")
+	}
+
+	rooms := map[string]*Room{
+		defaultRoomName: newRoom(defaultRoomName),
+	}
+
+	for name, messages := range history {
+		if name == "" {
+			return fmt.Errorf("room name must not be empty")
+		}
+
+		if len(messages) > historyLimit {
+			messages = messages[len(messages)-historyLimit:]
+		}
+
+		room := newRoom(name)
+		room.history = make([]string, len(messages))
+		copy(room.history, messages)
+
+		rooms[name] = room
+	}
+
+	hub.rooms = rooms
+
+	return nil
+}
+
 func (hub *Hub) Count() int {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
