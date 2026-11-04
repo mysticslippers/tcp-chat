@@ -191,6 +191,22 @@ func (hub *Hub) GetRooms() map[string]int {
 	return rooms
 }
 
+func (hub *Hub) ExportHistory() map[string][]string {
+	hub.mutex.Lock()
+	defer hub.mutex.Unlock()
+
+	history := make(map[string][]string, len(hub.rooms))
+
+	for name, room := range hub.rooms {
+		messages := make([]string, len(room.history))
+		copy(messages, room.history)
+
+		history[name] = messages
+	}
+
+	return history
+}
+
 func (hub *Hub) Publish(sender *Session, message string) {
 	var failed []*Session
 
