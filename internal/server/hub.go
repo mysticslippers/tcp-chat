@@ -171,7 +171,7 @@ func (hub *Hub) GetRoomName(session *Session) string {
 	hub.mutex.Lock()
 	defer hub.mutex.Unlock()
 
-	if session == nil {
+	if session == nil || session.room == nil {
 		return ""
 	}
 
