@@ -67,5 +67,11 @@ func main() {
 
 	<-done
 	handlers.Wait()
+
+	err = server.SaveHistory(filename, hub.ExportHistory())
+	if err != nil {
+		log.Printf("Unable to save history: %s", err)
+	}
+
 	log.Println("Server is shutdown")
 }
