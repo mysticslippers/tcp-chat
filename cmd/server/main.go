@@ -9,6 +9,7 @@ import (
 )
 
 func main() {
+	const filename = "history.json"
 	const address = "localhost:9000"
 
 	listener, err := net.Listen("tcp", address)
