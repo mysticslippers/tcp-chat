@@ -5,19 +5,34 @@ import (
 	"errors"
 	"log"
 	"net"
+	"os"
 	"sync"
 )
 
 func main() {
-	const filename = "history.json"
-	const address = "localhost:9000"
+	const (
+		filename = "history.json"
+		address  = "localhost:9000"
+	)
+
+	hub := server.NewHub()
+
+	history, err := server.LoadHistory(filename)
+	if err != nil {
+		if !errors.Is(err, os.ErrNotExist) {
+			log.Fatalf("Unable to load history: %s", err)
+		}
+	} else {
+		err = hub.RestoreHistory(history)
+		if err != nil {
+			log.Fatalf("Unable to restore history: %s", err)
+		}
+	}
 
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		log.Fatalf("Unable to start server: %s", err)
 	}
-
-	hub := server.NewHub()
 
 	var handlers sync.WaitGroup
 	stop := make(chan struct{})
