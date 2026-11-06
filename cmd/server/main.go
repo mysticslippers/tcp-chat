@@ -85,6 +85,7 @@ func main() {
 
 	<-done
 	handlers.Wait()
+	<-autosaveDone
 
 	err = server.SaveHistory(filename, hub.ExportHistory())
 	if err != nil {
