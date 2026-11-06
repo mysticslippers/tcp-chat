@@ -3,6 +3,7 @@ package main
 import (
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbles/v2/viewport"
+	tea "charm.land/bubbletea/v2"
 )
 
 type chatModel struct {
@@ -11,7 +12,7 @@ type chatModel struct {
 	messages []string
 }
 
-func buildChatModel() chatModel {
+func newChatModel() chatModel {
 	input := textinput.New()
 	input.Prompt = "> "
 	input.Placeholder = "Сообщение или команда... Можете ввести команду /help"
@@ -29,4 +30,8 @@ func buildChatModel() chatModel {
 		input:    input,
 		viewport: view,
 	}
+}
+
+func (model chatModel) Init() tea.Cmd {
+	return textinput.Blink
 }
