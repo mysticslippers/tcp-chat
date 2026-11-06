@@ -286,7 +286,6 @@ func (hub *Hub) snapshot() []*Session {
 
 func (hub *Hub) Join(session *Session, name string) error {
 	hub.mutex.Lock()
-	defer hub.mutex.Unlock()
 
 	if name == "" {
 		return fmt.Errorf("room name must not be empty")
@@ -305,16 +304,31 @@ func (hub *Hub) Join(session *Session, name string) error {
 	}
 
 	if session.room == room {
+		hub.mutex.Unlock()
 		return nil
 	}
 
+	nickname := session.GetNickname()
+	var failed []*Session
+
 	if session.room != nil {
-		delete(session.room.sessions, session)
+		old := session.room
+		delete(old.sessions, session)
+
+		message := fmt.Sprintf("[server] %s left %s\n", nickname, old.name)
+
+		failed = hub.notifyRoomLocked(old, session, message)
 	}
 
 	room.sessions[session] = struct{}{}
 	session.room = room
 
+	message := fmt.Sprintf("[server] %s joined %s\n", nickname, room.name)
+
+	failed = append(failed, hub.notifyRoomLocked(room, session, message)...)
+
+	hub.mutex.Unlock()
+	closeFailedSessions(failed)
 	return nil
 }
 
