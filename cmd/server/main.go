@@ -37,7 +37,10 @@ func main() {
 	var handlers sync.WaitGroup
 	stop := make(chan struct{})
 	done := make(chan struct{})
+	autosaveDone := make(chan struct{})
 	shutDownRequested := make(chan struct{})
+
+	go autosave(hub, filename, stop, autosaveDone)
 
 	go func(listener net.Listener, stop <-chan struct{}, done chan struct{}, hub *server.Hub) {
 		defer close(done)
