@@ -1,14 +1,15 @@
 package main
 
 import (
-	"Chat/internal/client"
 	"log"
+
+	tea "charm.land/bubbletea/v2"
 )
 
 func main() {
-	const address = "localhost:9000"
+	program := tea.NewProgram(newChatModel())
 
-	err := client.Client(address)
+	_, err := program.Run()
 	if err != nil {
 		log.Fatalf("Client error: %s", err)
 	}
