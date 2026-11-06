@@ -262,14 +262,7 @@ func (hub *Hub) Publish(sender *Session, message string) {
 
 	hub.mutex.Unlock()
 
-	for _, session := range failed {
-		log.Printf(
-			"Unable to queue message for %q; closing session",
-			session.GetNickname(),
-		)
-
-		session.close()
-	}
+	closeFailedSessions(failed)
 }
 
 func (hub *Hub) snapshot() []*Session {
