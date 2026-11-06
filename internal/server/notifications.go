@@ -10,7 +10,7 @@ func closeFailedSessions(sessions []*Session) {
 	}
 }
 
-func notifyRoomLocked(room *Room, excluded *Session, message string) []*Session {
+func (hub *Hub) notifyRoomLocked(room *Room, excluded *Session, message string) []*Session {
 	var failed []*Session
 
 	for recipient := range room.sessions {
