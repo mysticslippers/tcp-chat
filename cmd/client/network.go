@@ -2,6 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"net"
+	"time"
 
 	tea "charm.land/bubbletea/v2"
 )
@@ -22,5 +25,21 @@ func readMessage(decoder *json.Decoder) tea.Cmd {
 		}
 
 		return serverMessageMsg(reply)
+	}
+}
+
+func sendMessage(connection net.Conn, text string) tea.Cmd {
+	return func() tea.Msg {
+		err := connection.SetWriteDeadline(time.Now().Add(5 * time.Second))
+		if err != nil {
+			return networkErrorMsg{err}
+		}
+
+		_, err = fmt.Fprintln(connection, text)
+		if err != nil {
+			return networkErrorMsg{err}
+		}
+
+		return messageSentMsg{}
 	}
 }
