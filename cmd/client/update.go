@@ -60,6 +60,17 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		return model, readMessage(model.decoder)
+
+	case messageSentMsg:
+		if len(model.pending) == 0 {
+			model.sending = false
+			return model, nil
+		}
+
+		text := model.pending[0]
+		model.pending = model.pending[1:]
+
+		return model, sendMessage(model.connection, text)
 	}
 
 	var command tea.Cmd
