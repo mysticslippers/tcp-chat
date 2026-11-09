@@ -45,5 +45,8 @@ func newChatModel(connection net.Conn) chatModel {
 }
 
 func (model chatModel) Init() tea.Cmd {
-	return textinput.Blink
+	return tea.Batch(
+		textinput.Blink,
+		readMessage(model.decoder),
+	)
 }
