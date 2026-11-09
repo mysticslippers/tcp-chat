@@ -47,6 +47,19 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 			model.viewport.PageDown()
 			return model, nil
 		}
+
+	case serverMessageMsg:
+		atBottom := model.viewport.AtBottom()
+
+		text := strings.TrimRight(string(event), "\r\n")
+		model.messages = append(model.messages, text)
+		model.viewport.SetContent(strings.Join(model.messages, "\n"))
+
+		if atBottom {
+			model.viewport.GotoBottom()
+		}
+
+		return model, readMessage(model.decoder)
 	}
 
 	var command tea.Cmd
