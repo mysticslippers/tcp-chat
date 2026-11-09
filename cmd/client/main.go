@@ -2,6 +2,8 @@ package main
 
 import (
 	"errors"
+	"fmt"
+	"io"
 	"log"
 	"net"
 
@@ -9,9 +11,14 @@ import (
 )
 
 func main() {
-	program := tea.NewProgram(newChatModel(nil))
+	const address = "localhost:9000"
 
-	_, err := program.Run()
+	err := run(address)
+	if errors.Is(err, io.EOF) {
+		fmt.Println("Server closed the connection")
+		return
+	}
+
 	if err != nil {
 		log.Fatalf("Client error: %s", err)
 	}
