@@ -21,7 +21,7 @@ type chatModel struct {
 	networkErr error
 }
 
-func newChatModel() chatModel {
+func newChatModel(connection net.Conn) chatModel {
 	input := textinput.New()
 	input.Prompt = "> "
 	input.Placeholder = "Сообщение или команда... Можете ввести команду /help"
