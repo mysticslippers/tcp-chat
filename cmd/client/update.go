@@ -71,6 +71,10 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 		model.pending = model.pending[1:]
 
 		return model, sendMessage(model.connection, text)
+
+	case networkErrorMsg:
+		model.networkErr = event.err
+		return model, tea.Quit
 	}
 
 	var command tea.Cmd
