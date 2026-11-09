@@ -32,12 +32,15 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 				return model, nil
 			}
 
-			model.messages = append(model.messages, "Вы: "+text)
-			model.viewport.SetContent(strings.Join(model.messages, "\n"))
-			model.viewport.GotoBottom()
 			model.input.Reset()
 
-			return model, nil
+			if model.sending {
+				model.pending = append(model.pending, text)
+				return model, nil
+			}
+
+			model.sending = true
+			return model, sendMessage(model.connection, text)
 
 		case "pgup":
 			model.viewport.PageUp()
@@ -74,6 +77,7 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 
 	case networkErrorMsg:
 		model.networkErr = event.err
+
 		return model, tea.Quit
 	}
 
