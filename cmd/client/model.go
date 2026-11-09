@@ -1,6 +1,9 @@
 package main
 
 import (
+	"encoding/json"
+	"net"
+
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbles/v2/viewport"
 	tea "charm.land/bubbletea/v2"
@@ -10,6 +13,12 @@ type chatModel struct {
 	input    textinput.Model
 	viewport viewport.Model
 	messages []string
+
+	connection net.Conn
+	decoder    *json.Decoder
+	pending    []string
+	sending    bool
+	networkErr error
 }
 
 func newChatModel() chatModel {
