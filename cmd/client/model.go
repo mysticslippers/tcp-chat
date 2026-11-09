@@ -38,6 +38,9 @@ func newChatModel(connection net.Conn) chatModel {
 	return chatModel{
 		input:    input,
 		viewport: view,
+
+		connection: connection,
+		decoder:    json.NewDecoder(connection),
 	}
 }
 
