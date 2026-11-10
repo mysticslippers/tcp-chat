@@ -39,6 +39,8 @@ func newChatModel(connection net.Conn) chatModel {
 	input := textinput.New()
 	input.Prompt = "> "
 	input.Placeholder = "Сообщение или команда... Можете ввести команду /help"
+	input.ShowSuggestions = true
+	input.SetSuggestions(commandSuggestions)
 	input.SetVirtualCursor(true)
 	input.Focus()
 
