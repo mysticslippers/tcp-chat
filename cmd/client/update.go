@@ -33,6 +33,7 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 			}
 
 			model.input.Reset()
+			model.input.SetSuggestions(commandSuggestions)
 
 			if model.sending {
 				model.pending = append(model.pending, text)
