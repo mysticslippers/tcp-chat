@@ -9,6 +9,20 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
+var commandSuggestions = []string{
+	"/help",
+	"/history",
+	"/join",
+	"/msg",
+	"/nick",
+	"/online",
+	"/quit",
+	"/rooms",
+	"/stats",
+	"/where",
+	"/who",
+}
+
 type chatModel struct {
 	input    textinput.Model
 	viewport viewport.Model
