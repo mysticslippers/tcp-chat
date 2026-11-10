@@ -92,6 +92,4 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return model, command
-
-	return model, command
 }
