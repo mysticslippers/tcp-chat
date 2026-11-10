@@ -82,8 +82,16 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 		return model, tea.Quit
 	}
 
+	previousText := model.input.Value()
+
 	var command tea.Cmd
 	model.input, command = model.input.Update(event)
+
+	if model.input.Value() != previousText {
+		model.input.SetSuggestions(commandSuggestions)
+	}
+
+	return model, command
 
 	return model, command
 }
