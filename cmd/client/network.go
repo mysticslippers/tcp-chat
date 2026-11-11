@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -10,6 +11,12 @@ import (
 )
 
 const reconnectDelay = 2 * time.Second
+
+type serverConnection struct {
+	socket  net.Conn
+	decoder *json.Decoder
+	cancel  context.CancelFunc
+}
 
 type serverMessageMsg string
 type messageSentMsg struct{}
