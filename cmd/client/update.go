@@ -28,7 +28,7 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 				return model, tea.Quit
 			}
 
-			if strings.TrimSpace(text) == "" {
+			if model.connection == nil || strings.TrimSpace(text) == "" {
 				return model, nil
 			}
 
@@ -53,9 +53,13 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 	case serverMessageMsg:
+		if event.connection != model.connection {
+			return model, nil
+		}
+
 		atBottom := model.viewport.AtBottom()
 
-		text := strings.TrimRight(string(event), "\r\n")
+		text := strings.TrimRight(event.text, "\r\n")
 		model.messages = append(model.messages, text)
 		model.viewport.SetContent(strings.Join(model.messages, "\n"))
 
@@ -63,9 +67,13 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 			model.viewport.GotoBottom()
 		}
 
-		return model, readMessage(model.decoder)
+		return model, readMessage(model.connection)
 
 	case messageSentMsg:
+		if event.connection != model.connection {
+			return model, nil
+		}
+
 		if len(model.pending) == 0 {
 			model.sending = false
 			return model, nil
@@ -76,10 +84,28 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 
 		return model, sendMessage(model.connection, text)
 
-	case networkErrorMsg:
-		model.networkErr = event.err
+	case connectResultMsg:
+		if event.err != nil {
+			model.networkErr = event.err
+			return model, connect(model.ctx, model.address, reconnectDelay)
+		}
 
-		return model, tea.Quit
+		model.connection = event.connection
+		model.networkErr = nil
+		return model, readMessage(model.connection)
+
+	case networkErrorMsg:
+		if event.connection != model.connection {
+			return model, nil
+		}
+
+		model.connection.cancel()
+		model.connection = nil
+		model.networkErr = event.err
+		model.pending = nil
+		model.sending = false
+
+		return model, connect(model.ctx, model.address, 0)
 	}
 
 	previousText := model.input.Value()
