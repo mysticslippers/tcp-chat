@@ -23,10 +23,18 @@ type connectResultMsg struct {
 	err        error
 }
 
-type serverMessageMsg string
-type messageSentMsg struct{}
+type serverMessageMsg struct {
+	connection *serverConnection
+	text       string
+}
+
+type messageSentMsg struct {
+	connection *serverConnection
+}
+
 type networkErrorMsg struct {
-	err error
+	connection *serverConnection
+	err        error
 }
 
 func connect(ctx context.Context, address string, delay time.Duration) tea.Cmd {
@@ -61,31 +69,42 @@ func connect(ctx context.Context, address string, delay time.Duration) tea.Cmd {
 	}
 }
 
-func readMessage(decoder *json.Decoder) tea.Cmd {
+func readMessage(connection *serverConnection) tea.Cmd {
 	return func() tea.Msg {
 		var reply string
-
-		err := decoder.Decode(&reply)
+		err := connection.decoder.Decode(&reply)
 		if err != nil {
-			return networkErrorMsg{err}
+			return networkErrorMsg{
+				connection: connection,
+				err:        err,
+			}
 		}
 
-		return serverMessageMsg(reply)
+		return serverMessageMsg{
+			connection: connection,
+			text:       reply,
+		}
 	}
 }
 
-func sendMessage(connection net.Conn, text string) tea.Cmd {
+func sendMessage(connection *serverConnection, text string) tea.Cmd {
 	return func() tea.Msg {
-		err := connection.SetWriteDeadline(time.Now().Add(5 * time.Second))
+		err := connection.socket.SetWriteDeadline(time.Now().Add(5 * time.Second))
 		if err != nil {
-			return networkErrorMsg{err}
+			return networkErrorMsg{
+				connection: connection,
+				err:        err,
+			}
 		}
 
-		_, err = fmt.Fprintln(connection, text)
+		_, err = fmt.Fprintln(connection.socket, text)
 		if err != nil {
-			return networkErrorMsg{err}
+			return networkErrorMsg{
+				connection: connection,
+				err:        err,
+			}
 		}
 
-		return messageSentMsg{}
+		return messageSentMsg{connection: connection}
 	}
 }
