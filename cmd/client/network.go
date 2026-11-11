@@ -29,6 +29,38 @@ type networkErrorMsg struct {
 	err error
 }
 
+func connect(ctx context.Context, address string, delay time.Duration) tea.Cmd {
+	return func() tea.Msg {
+		timer := time.NewTimer(delay)
+		defer timer.Stop()
+
+		select {
+		case <-ctx.Done():
+			return nil
+		case <-timer.C:
+		}
+
+		dialer := net.Dialer{Timeout: 3 * time.Second}
+		socket, err := dialer.DialContext(ctx, "tcp", address)
+		if err != nil {
+			return connectResultMsg{err: err}
+		}
+
+		connectionCtx, cancel := context.WithCancel(ctx)
+		context.AfterFunc(connectionCtx, func() {
+			_ = socket.Close()
+		})
+
+		return connectResultMsg{
+			connection: &serverConnection{
+				socket:  socket,
+				decoder: json.NewDecoder(socket),
+				cancel:  cancel,
+			},
+		}
+	}
+}
+
 func readMessage(decoder *json.Decoder) tea.Cmd {
 	return func() tea.Msg {
 		var reply string
