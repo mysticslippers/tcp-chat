@@ -1,8 +1,7 @@
 package main
 
 import (
-	"encoding/json"
-	"net"
+	"context"
 
 	"charm.land/bubbles/v2/textinput"
 	"charm.land/bubbles/v2/viewport"
@@ -28,14 +27,15 @@ type chatModel struct {
 	viewport viewport.Model
 	messages []string
 
-	connection net.Conn
-	decoder    *json.Decoder
+	ctx        context.Context
+	address    string
+	connection *serverConnection
 	pending    []string
 	sending    bool
 	networkErr error
 }
 
-func newChatModel(connection net.Conn) chatModel {
+func newChatModel(ctx context.Context, address string) chatModel {
 	input := textinput.New()
 	input.Prompt = "> "
 	input.Placeholder = "Сообщение или команда... Можете ввести команду /help"
@@ -54,15 +54,14 @@ func newChatModel(connection net.Conn) chatModel {
 	return chatModel{
 		input:    input,
 		viewport: view,
-
-		connection: connection,
-		decoder:    json.NewDecoder(connection),
+		ctx:      ctx,
+		address:  address,
 	}
 }
 
 func (model chatModel) Init() tea.Cmd {
 	return tea.Batch(
 		textinput.Blink,
-		readMessage(model.decoder),
+		connect(model.ctx, model.address, 0),
 	)
 }
