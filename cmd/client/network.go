@@ -9,6 +9,8 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
+const reconnectDelay = 2 * time.Second
+
 type serverMessageMsg string
 type messageSentMsg struct{}
 type networkErrorMsg struct {
