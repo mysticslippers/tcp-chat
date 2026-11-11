@@ -18,6 +18,11 @@ type serverConnection struct {
 	cancel  context.CancelFunc
 }
 
+type connectResultMsg struct {
+	connection *serverConnection
+	err        error
+}
+
 type serverMessageMsg string
 type messageSentMsg struct{}
 type networkErrorMsg struct {
