@@ -65,6 +65,8 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 
 		if atBottom {
 			model.viewport.GotoBottom()
+		} else {
+			model.unreadCount++
 		}
 
 		return model, readMessage(model.connection)
