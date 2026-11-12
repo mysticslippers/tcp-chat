@@ -33,6 +33,8 @@ type chatModel struct {
 	pending    []string
 	sending    bool
 	networkErr error
+
+	unreadCount int
 }
 
 func newChatModel(ctx context.Context, address string) chatModel {
