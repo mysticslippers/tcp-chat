@@ -49,6 +49,14 @@ func (model chatModel) Update(event tea.Msg) (tea.Model, tea.Cmd) {
 
 		case "pgdown":
 			model.viewport.PageDown()
+			if model.viewport.AtBottom() {
+				model.unreadCount = 0
+			}
+			return model, nil
+
+		case "end":
+			model.viewport.GotoBottom()
+			model.unreadCount = 0
 			return model, nil
 		}
 
